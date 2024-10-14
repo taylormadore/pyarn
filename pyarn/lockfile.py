@@ -34,7 +34,7 @@ V1_VERSION_COMMENT = "# yarn lockfile v1"
 
 class Package:
     def __init__(
-        self, name, version, url=None, checksum=None, relpath=None, dependencies=None, alias=None
+        self, name, version, url=None, checksum=None, path=None, dependencies=None, alias=None
     ):
         if not name:
             raise ValueError("Package name was not provided")
@@ -46,7 +46,7 @@ class Package:
         self.version = version
         self.url = url
         self.checksum = checksum
-        self.relpath = relpath
+        self.path = path
         self.dependencies = dependencies or {}
         self.alias = alias
 
@@ -71,7 +71,7 @@ class Package:
             version=data.get("version"),
             url=data.get("resolved"),
             checksum=data.get("integrity"),
-            relpath=path,
+            path=path,
             dependencies=data.get("dependencies", {}),
             alias=alias,
         )
