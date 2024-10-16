@@ -19,7 +19,7 @@ import json
 import logging
 import re
 from pathlib import Path
-from typing import Optional, Pattern
+from typing import Any, Optional, Pattern
 
 from ply import lex, yacc
 
@@ -35,8 +35,15 @@ V1_VERSION_COMMENT = "# yarn lockfile v1"
 
 class Package:
     def __init__(
-        self, name, version, url=None, checksum=None, path=None, dependencies=None, alias=None
-    ):
+        self,
+        name: str,
+        version: str,
+        url: Optional[str] = None,
+        checksum: Optional[str] = None,
+        path: Optional[str] = None,
+        dependencies: Optional[dict[str, str]] = None,
+        alias: Optional[str] = None,
+    ) -> None:
         if not name:
             raise ValueError("Package name was not provided")
 
@@ -52,7 +59,7 @@ class Package:
         self.alias = alias
 
     @classmethod
-    def from_dict(cls, raw_name, data):
+    def from_dict(cls, raw_name: str, data: dict[str, Any]) -> "Package":
         name_at_version = re.compile(r"(?P<name>@?[^@]+)(?:@(?P<version>[^,]*))?")
 
         # _version is the version as declared in package.json, not the resolved version
@@ -67,9 +74,14 @@ class Package:
         if _version:
             path = cls.get_path_from_version_specifier(_version)
 
+        # Ensure the resolved version key exists to appease mypy
+        version = data.get("version")
+        if not version:
+            raise ValueError("Package version was not provided")
+
         return cls(
             name=name,
-            version=data.get("version"),
+            version=version,
             url=data.get("resolved"),
             checksum=data.get("integrity"),
             path=path,
